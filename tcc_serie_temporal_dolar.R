@@ -6,20 +6,6 @@
 
 # Instalação e Carregamento de Todos os Pacotes ---------------------------
 
-pacotes <- c("readxl","plotly","tidyverse","gridExtra","forecast","TTR",
-             "smooth","tidyverse", "tsibble", "fable","tsibbledata", "fpp3",
-             "urca")
-
-if(sum(as.numeric(!pacotes %in% installed.packages())) != 0){
-  instalador <- pacotes[!pacotes %in% installed.packages()]
-  for(i in 1:length(instalador)) {
-    install.packages(instalador, dependencies = T)
-    break()}
-  sapply(pacotes, require, character = T)
-} else {
-  sapply(pacotes, require, character = T)
-}
-
 pacotes <- c("readr","readxl","plotly","tidyverse","gridExtra","forecast","TTR",
              "smooth", "tsibble", "fable","tsibbledata", "fpp3","lubridate",
              "urca", "dygraphs", "quantmod","BETS","tseries","FinTS","feasts",
@@ -36,31 +22,15 @@ if(sum(as.numeric(!pacotes %in% installed.packages())) != 0){
   sapply(pacotes, require, character = T)
 }
 
-#-------------------------------------------------------------------------
-
-###############################################################################
-###############################################################################
-## Modelos ARIMA - (Box - Jenkins)
-###############################################################################
-###############################################################################
-
-
-###### Buscar o caminho do diretório onde está salvo a base de dados
+# Buscar o caminho do diretório onde está salvo a base de dados
 
 base_dolar <- read_excel("serie_dolar_cepea.xlsx")
 
-###### Lendo a base de dados
+# Lendo a base de dados
 
 View(base_dolar)
 
-##### Lendo apenas as primeiras linhas das variáveis
-
-head(base_dolar)
-
-base_dolar
-
-
-##### Transformando em série temporal
+# Transformando em série temporal, com frequência de 250 dias úteis
 
 dolar=ts(base_dolar[2], start = c(2000,1,3), end=c(2024,1,10),frequency = 250)
 
@@ -71,7 +41,8 @@ autoplot(dolar) +
 
 monthplot(dolar, col.base=1,lty.base = 2)
 
-# Separando as janelas
+# Separando a série em duas janelas de tempo
+
 sdolar=window(dolar, start=c(2000,1), end=c(2023,1))
 plot(sdolar)
 teste=window(dolar, start=c(2023,1), end=c(2024,1))
@@ -90,21 +61,21 @@ autoplot(dolar) +
         panel.border = element_rect(color = "black", fill = NA),
         legend.position = "bottom")
 
-## Análise da Série
+# Análise da Série
+
 ggtsdisplay(sdolar, theme=theme_grey())
 acf(sdolar)
 pacf(sdolar)
 
-# tenho uma prossível sazonalidade
-
 # Teste de Estacionariedade
+
 testeDF_dolar=ur.df(sdolar)
 summary(testeDF_dolar)
 
 # Conclusão: p-value 0.307 > 0.01 (99% confiança) - ACEITO H0,
-# portanto a série NÃO é estacionária
-# A série não é estacionária - precisa ser diferenciada
+# portanto a série NÃO é estacionária, precisa ser diferenciada
 
+# Verificar quantas diferenciações são necessárias
 
 ndiffs(sdolar)
 
@@ -112,6 +83,8 @@ ndiffs(sdolar)
 
 difsdolar=diff(sdolar)
 ggtsdisplay(difsdolar)
+
+# Teste de Estacionariedade da série diferenciada
 
 teste_dolardif=ur.df(difsdolar)
 summary(teste_dolardif)
@@ -123,8 +96,7 @@ modelo_original_dolar=auto.arima(sdolar, trace=T)
 # Estimando um modelo inicial pelo autoarima para os dados com uma diferenciação
 modelo_dif_dolar=auto.arima(difsdolar,trace = T)
 
-
-#### validação e diagnóstico
+# validação e diagnóstico
 
 checkresiduals(modelo_original_dolar)
 
@@ -145,7 +117,7 @@ ArchTest(modelo_original_dolar$residuals)
 # p-valor 2.2e-16 < 0,01, rejeita-se H0, sugere a existência
 # de efeitos ARCH
 
-## Previsao para a série de dólar 
+# Previsao para a série de dólar 
 
 prev_dolar=forecast::forecast(modelo_original_dolar, h=500)
 
@@ -155,9 +127,11 @@ autoplot(prev_dolar) +
   scale_color_grey() +
   theme_bw()
 
+# Verificar a acurácia
+
 forecast::accuracy(prev_dolar, teste)
 
-
+## FIM!
 
 
 
