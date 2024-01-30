@@ -4,4 +4,4 @@ Este diretório é reservado para registro dos códigos dos projetos que desenvo
 
 Utilizei, principalmente, as linguagens R e Python.
 
-1. TCC com o tema [Projeções do dólar para 2024-2025](github.com/elisamaribeiro/my-projects-mba-usp-esalq/tcc_serie_temporal_dolar.R)
+1. TCC com o tema [Projeções do dólar para 2024-2025](https://github.com/elisamaribeiro/my-projects-mba-usp-esalq/blob/main/tcc_serie_temporal_dolar.R)
